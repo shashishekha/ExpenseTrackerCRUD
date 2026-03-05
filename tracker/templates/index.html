@@ -16,22 +16,21 @@
     </div>
     <div>
       <h4>Expenses</h4>
-      <p id="money-minus" class="money minus">{{expense}}</p>
+      <p id="money-minus" class="money minus">{{ expense }}</p>
     </div>
   </div>
   <h3>History</h3>
   <ul id="list" class="list">
-    {% for transaction in transactions %}
-    <li class="{% if transaction.isNegative %}minus {% else %}plus {% endif %}">
-        {{transaction.description}} <span>{{transaction.amount}} </span>
-        <a href="{% url 'deleteTransaction' transaction.uuid %}"class="delete-btn">
+    {% for transactions in transaction %}
+    <li class="{% if transactions.isNegative %} minus {% else %} plus {% endif %}">
+        {{ transactions.description }} <span> {{ transactions.amount }} </span>
+        <a href="{% url 'deleteTransaction' transactions.uuid %}" class="delete-btn">
         <i class="fa fa-times"></i>
         </a>
-    
     </li>
 
     {% endfor %}
-    <li class="plus">
+    {% comment %} <li class="plus">
       Salary <span>+300</span
       ><button class="delete-btn" onclick="removeTransaction(2)">
         <i class="fa fa-times"></i>
@@ -48,7 +47,7 @@
       ><button class="delete-btn" onclick="removeTransaction(4)">
         <i class="fa fa-times"></i>
       </button>
-    </li>
+    </li> {% endcomment %}
   </ul>
   <ul id="list" class="list"></ul>
   <h3>Add new transaction</h3>
