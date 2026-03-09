@@ -4,6 +4,8 @@ from tracker.models import Transaction
 from django.db.models import Sum, Q
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+
 
 # Create your views here.
 
@@ -41,7 +43,7 @@ def registeration(request):
 
 def login_page(request):
     
-    if request.method == "post":
+    if request.method == "POST":
         username = request.POST.get('username')
         password = request.POST.get('password')
         user_obj = User.objects.filter(
@@ -78,6 +80,7 @@ def logout_page(request):
     return redirect("/login/")
 
 
+@login_required(login_url = '/login/')
 def index(request):
     print(request.user)
     if request.method == "POST":
@@ -97,19 +100,21 @@ def index(request):
         Transaction.objects.create(
             description = description,
             amount = amount,
+            created_by = request.user,
         )
         
 
         return redirect('/')
     
-    context ={'transaction':Transaction.objects.all(),
-              'balance': Transaction.objects.all().aggregate(total_balance = Sum('amount'))['total_balance'] or 0,
-              'income': Transaction.objects.filter(amount__gte = 0).aggregate(income = Sum('amount'))['income'] or 0,
-              'expense': Transaction.objects.filter(amount__lte = 0).aggregate(expense = Sum('amount'))['expense'] or 0
+    context ={'transaction':Transaction.objects.filter(created_by = request.user),
+              'balance': Transaction.objects.filter(created_by = request.user).aggregate(total_balance = Sum('amount'))['total_balance'] or 0,
+              'income': Transaction.objects.filter(created_by = request.user, amount__gte = 0).aggregate(income = Sum('amount'))['income'] or 0,
+              'expense': Transaction.objects.filter(created_by = request.user, amount__lte = 0).aggregate(expense = Sum('amount'))['expense'] or 0
             }
 
     return render(request,'index.html',context)
 
+@login_required(login_url = '/login/')
 def deleteTransaction(request,uuid):
     Transaction.objects.get(uuid = uuid).delete()
     return redirect('/')
